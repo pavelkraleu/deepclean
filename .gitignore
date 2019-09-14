@@ -1,0 +1,8 @@
+export.csv
+training_weights/*
+training_results/*
+data/*
+background_images
+venv/
+video_files/*
+.idea
