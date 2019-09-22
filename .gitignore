@@ -6,3 +6,5 @@ background_images
 venv/
 video_files/*
 .idea
+training_data/
+training_data.tar

@@ -7,15 +7,19 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 import os
 
+from deepclean import settings
+
 input_csv_file = sys.argv[1]
 
 
 def process_image(image):
-    """Convert a single image to 1024x1024 RGB image"""
-    if image.ndim == 2:
-        image = cv2.cvtColor(image, cv2.COLOR_GRAY2RGB)
+    """Convert a single image to 1024x1024 image"""
 
-    blank_image = np.zeros((1024, 1024, 3), dtype=np.uint8)
+    blank_shape = (1024, 1024, 3)
+    if image.ndim == 2:
+        blank_shape = blank_shape[0:2]
+
+    blank_image = np.zeros(blank_shape, dtype=np.uint8)
     y_offset = x_offset = 0
 
     blank_image[y_offset:y_offset + image.shape[0], x_offset:x_offset +
@@ -28,7 +32,8 @@ def save_image(image, image_type, destination_dir, file_id):
     output_path = f"./data/{destination_dir}/{image_type}"
     os.makedirs(output_path, exist_ok=True)
 
-    cv2.imwrite(output_path + f"/{file_id}.png", cv2.resize(image, (512, 512)))
+    cv2.imwrite(output_path + f"/{file_id}.png",
+                cv2.resize(image, settings.DETECTOR_NETWORK_RESOLUTION))
 
 
 def process_df(df, destination_dir):

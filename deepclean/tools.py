@@ -4,54 +4,21 @@ import cv2
 import skimage
 
 
-def get_random_background(width, height, negative_images):
-    """
-    Makes image with given size which doesn't contain graffiti
+def paste_on_background(image, mask, background_image):
+    foreground = image.astype(float)
+    background = background_image.astype(float)
+    # mask = cv2.cvtColor(mask, cv2.COLOR_GRAY2BGR)
 
-    :param width: Resulting width in pixels
-    :param height: Resulting height in pixels
-    :param negative_images: List of paths to negative images
+    alpha = cv2.inRange(mask, 0, 0)
+    alpha = cv2.bitwise_not(alpha).astype(float) / 255
 
-    """
+    alpha = np.stack((alpha, ) * 3, axis=-1)
 
-    random.shuffle(negative_images)
-    img = cv2.imread(negative_images[0])
+    foreground = cv2.multiply(alpha, foreground)
 
-    min_value_img = min(img.shape[0:2])
-    min_value_size = min((width, height))
-    min_ratio = min_value_size / min_value_img
-    img_resize_ratio = random.uniform(min_ratio, 1.0)
+    background = cv2.multiply(1.0 - alpha, background)
 
-    img = skimage.transform.rescale(img,
-                                    img_resize_ratio,
-                                    multichannel=True,
-                                    preserve_range=True).astype(np.uint8)
-
-    if min(img.shape[:2]) < min(width, height):
-        # Image is smaller than self.target_size. Scale it up
-        resize_ratio = min(width, height) / min(img.shape[:2])
-
-    else:
-        # Image is larger than self.target_size. Scale it down a little
-        resize_ratio = min(width, height) / min(img.shape[:2])
-        resize_ratio = random.uniform(resize_ratio, 1.0)
-
-    img = skimage.transform.rescale(img,
-                                    resize_ratio,
-                                    multichannel=True,
-                                    anti_aliasing=True,
-                                    mode='constant',
-                                    preserve_range=True)
-
-    y_range = img.shape[0] - height
-    x_range = img.shape[1] - width
-
-    y_skip = random.randint(0, y_range)
-    x_skip = random.randint(0, x_range)
-
-    crop_img = img[y_skip:y_skip + height, x_skip:x_skip + width]
-
-    return crop_img
+    return cv2.add(foreground, background).astype(np.uint8)
 
 
 def debug_data_generator(data_generator):
