@@ -5,14 +5,14 @@ import numpy as np
 
 
 def get_image_ids(image_directory):
-    images = list(image_directory.glob("*.png"))
+    images = image_directory.glob("*.png")
     return [image.name.split(".")[0] for image in images]
 
 
 def image_iterator(validation=False):
     """Endless iterator generating image and corresponding mask"""
-    data_directory = settings.IMAGE_TRAINING_DATA_DIR
 
+    data_directory = settings.IMAGE_TRAINING_DATA_DIR
     if validation:
         data_directory = settings.IMAGE_VALIDATION_DATA_DIR
 
