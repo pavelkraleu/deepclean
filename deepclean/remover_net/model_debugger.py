@@ -1,42 +1,31 @@
-import glob
-import os
-import pickle
-import shutil
-
-import imageio
 import keras
-from keras.callbacks import CSVLogger, ModelCheckpoint
-from keras.optimizers import Adam
-from segmentation_models import Unet
-from segmentation_models.backbones import get_preprocessing
-from segmentation_models.losses import bce_jaccard_loss
-from segmentation_models.metrics import iou_score
-import numpy as np
-import cv2
-from segmentation_models.utils import set_trainable
 import matplotlib.pyplot as plt
-from skimage import transform
-
 from deepclean import settings
 
 
 class RemoverModelDebugger(keras.callbacks.Callback):
-
-    video_resolution = (1920, 1088)
-
-    video_files = glob.glob('./video_files/*.MOV')
-
+    """
+    This callback renders validation samples during training of remover network
+    """
     def __init__(self, trainer):
         super().__init__()
-
         self.trainer = trainer
 
     def on_epoch_end(self, epoch, logs={}):
+        for bi, batch in enumerate(self.trainer.validation_data):
+            if bi % 100 != 0:
+                continue
+            result = self.trainer.model.model.predict(batch[0])
+            for i, sample in enumerate(result):
+                if i % 2 != 0:
+                    continue
 
-        self.debug_validation_data(epoch)
+                self.save_sample(
+                    batch[0]['inputs_img'][i], sample,
+                    f'./training_results_{settings.REMOVER_NETWORK_NAME}/e{epoch}_b{bi}_s{i}.jpg'
+                )
 
     def save_sample(self, x, y, output_path):
-
         fig, axs = plt.subplots(1, 2, figsize=(16, 9), dpi=150)
         axs[0].imshow(x)
         axs[1].imshow(y)
@@ -49,20 +38,3 @@ class RemoverModelDebugger(keras.callbacks.Callback):
         plt.tight_layout()
         plt.savefig(output_path)
         plt.close(fig)
-
-    def debug_validation_data(self, epoch):
-
-        for bi, batch in enumerate(self.trainer.validation_data):
-
-            result = self.trainer.model.model.predict(batch[0])
-
-            for i, sample in enumerate(result):
-
-                print(sample.shape)
-
-                print(f'./training_results/e{epoch}_b{bi}_s{i}.jpg')
-                self.save_sample(
-                    batch[0]['inputs_img'][i],
-                    # batch[0]['inputs_mask'][i],
-                    sample,
-                    f'./training_results/e{epoch}_b{bi}_s{i}.jpg')
