@@ -1,24 +1,33 @@
 import os
-from keras.callbacks import ModelCheckpoint
-from keras.layers import GaussianNoise
+import tensorflow as tf
+tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
+from keras.callbacks import ModelCheckpoint, CSVLogger
 from keras.optimizers import Adam
 from segmentation_models import Unet
 from segmentation_models.losses import bce_jaccard_loss
 from segmentation_models.metrics import iou_score
 from segmentation_models.utils import set_trainable
 from deepclean import settings
-from deepclean.detector_net.detector_sequence_generator import DetectorSequenceGenerator
 from deepclean.detector_net.model_debugger import SegmentationModelDebugger
+from deepclean.detector_net.sequence_generator import SequenceGenerator
 
 
 class SegmentationNeuralNetwork:
 
-    checkpoint_path = f'./training_weights/weights-improvement.hdf5'
+    checkpoint_path = f'./training_weights_{settings.DETECTOR_NETWORK_BACKEND}/weights-improvement.hdf5'
+    csv_log_path_prefix = f'./training_weights_{settings.DETECTOR_NETWORK_BACKEND}/training_log.'
 
     def __init__(self):
 
-        self.training_data = DetectorSequenceGenerator()
-        self.validation_data = DetectorSequenceGenerator(validation=True)
+        print(f"Network architecture {settings.DETECTOR_NETWORK_BACKEND}")
+
+        os.makedirs(f'./training_weights_{settings.DETECTOR_NETWORK_BACKEND}',
+                    exist_ok=True)
+        os.makedirs(f'./training_results_{settings.DETECTOR_NETWORK_BACKEND}',
+                    exist_ok=True)
+
+        self.training_data = SequenceGenerator()
+        self.validation_data = SequenceGenerator(validation=True)
 
         adam = Adam()
 
@@ -28,43 +37,45 @@ class SegmentationNeuralNetwork:
                           (3, ))
 
         self.model.compile(adam, loss=bce_jaccard_loss, metrics=[iou_score])
-        self.model.summary(line_length=128)
+        # self.model.summary(line_length=128)
 
         if os.path.exists(self.checkpoint_path):
             print(f'Loading weights from {self.checkpoint_path}')
             self.model.load_weights(self.checkpoint_path)
 
-            # SegmentationModelDebugger(self).debug_validation_data(0)
-            # SegmentationModelDebugger(self).debug_video_data(0)
-
     def fit(self):
-        # for i in range(3500, len(self.training_data)):
-        #     print(f"generating {i}")
-        #     img = self.training_data[i]
-
         if not os.path.exists(self.checkpoint_path):
             print('Training decoder')
 
-            self.model.fit_generator(
-                self.training_data,
-                validation_data=self.validation_data,
-                epochs=6,
-                use_multiprocessing=True,
-                workers=4,
-                callbacks=[SegmentationModelDebugger(self)])
+            self.model.fit_generator(self.training_data,
+                                     validation_data=self.validation_data,
+                                     epochs=2,
+                                     use_multiprocessing=True,
+                                     workers=4,
+                                     callbacks=[
+                                         SegmentationModelDebugger(self, True),
+                                         CSVLogger(self.csv_log_path_prefix +
+                                                   'encoder.csv')
+                                     ])
 
         set_trainable(self.model)
 
-        self.model.fit_generator(self.training_data,
-                                 validation_data=self.validation_data,
-                                 epochs=41,
-                                 use_multiprocessing=True,
-                                 workers=4,
-                                 callbacks=[
-                                     SegmentationModelDebugger(self),
-                                     ModelCheckpoint(self.checkpoint_path,
-                                                     monitor='val_loss',
-                                                     verbose=False,
-                                                     save_best_only=True,
-                                                     mode='min')
-                                 ])
+        self.model.fit_generator(
+            self.training_data,
+            validation_data=self.validation_data,
+            epochs=50,
+            use_multiprocessing=True,
+            workers=4,
+            callbacks=[
+                SegmentationModelDebugger(self, False),
+                ModelCheckpoint(self.checkpoint_path,
+                                monitor='val_loss',
+                                save_best_only=True,
+                                mode='min'),
+                ModelCheckpoint(self.checkpoint_path +
+                                '.weights.{epoch:02d}-{loss:.2f}.hdf5',
+                                monitor='val_loss',
+                                save_best_only=True,
+                                save_weights_only=True),
+                CSVLogger(self.csv_log_path_prefix + 'complete.csv')
+            ])
