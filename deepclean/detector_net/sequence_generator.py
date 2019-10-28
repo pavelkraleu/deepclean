@@ -6,6 +6,9 @@ from deepclean.training_data_generator.base_data_generator import BaseDataGenera
 
 
 class SequenceGenerator(BaseDataGenerator):
+    """
+    Sequence generator for detector Net
+    """
     input_layer_name = settings.DETECTOR_INPUT_LAYER_NAME[
         settings.DETECTOR_NETWORK_BACKEND]
 
@@ -21,7 +24,6 @@ class SequenceGenerator(BaseDataGenerator):
         })
 
     def prepare_batch(self, batch):
-
         images = []
         images_processed = []
         masks = []

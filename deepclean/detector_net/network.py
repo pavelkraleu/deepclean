@@ -13,12 +13,13 @@ from deepclean.detector_net.sequence_generator import SequenceGenerator
 
 
 class SegmentationNeuralNetwork:
-
+    """
+    Neural network detecting graffiti in a image
+    """
     checkpoint_path = f'./training_weights_{settings.DETECTOR_NETWORK_BACKEND}/weights-improvement.hdf5'
     csv_log_path_prefix = f'./training_weights_{settings.DETECTOR_NETWORK_BACKEND}/training_log.'
 
     def __init__(self):
-
         print(f"Network architecture {settings.DETECTOR_NETWORK_BACKEND}")
 
         os.makedirs(f'./training_weights_{settings.DETECTOR_NETWORK_BACKEND}',
@@ -46,6 +47,8 @@ class SegmentationNeuralNetwork:
     def fit(self):
         if not os.path.exists(self.checkpoint_path):
             print('Training decoder')
+            # Train decoder first
+            # TODO : Does it really help ?
 
             self.model.fit_generator(self.training_data,
                                      validation_data=self.validation_data,

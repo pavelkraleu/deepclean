@@ -21,7 +21,13 @@ class BaseDataGenerator(keras.utils.Sequence):
         return [image.name.split(".")[0] for image in all_images]
 
     def prepare_batch(self, batch):
+        """
+        This method should return one batch from self.batch_data
+        """
         raise NotImplementedError()
 
     def prepare_batches(self, file_ids):
+        """
+        This method should fill self.batch_data, so each entry contains only one batch
+        """
         raise NotImplementedError()

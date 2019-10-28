@@ -44,6 +44,9 @@ final_image_augmentations = iaa.Sequential([
 
 
 class ImageProcessor:
+    """
+    Class for generating training samples
+    """
     def __init__(self, number_images_generate, validation=False):
         self.number_images_generate = number_images_generate
         self.validation = validation
@@ -59,7 +62,10 @@ class ImageProcessor:
         return images_stack, masks_stack, images_count
 
     def get_random_background(self, width, height, negative_images):
-
+        """
+        Generates random background image where we will paste graffiti sample.
+        We assume that this generated background contains no graffiti.
+        """
         random.shuffle(negative_images)
         img = skimage.io.imread(negative_images[0])
         img = cv2.cvtColor(img.astype(np.uint8), cv2.COLOR_BGR2RGB)
@@ -102,6 +108,9 @@ class ImageProcessor:
 
     def save_samples(self, mask, image_on_background, background_removed,
                      original_background):
+        """
+        Save a single sample to disk for training
+        """
 
         sample_id = random.randint(0, 5**50)
 
@@ -122,7 +131,6 @@ class ImageProcessor:
              original_background)
 
     def run(self):
-
         image_generator = image_iterator(validation=self.validation)
 
         for _ in tqdm(range(self.number_images_generate)):

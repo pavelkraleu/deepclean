@@ -7,7 +7,9 @@ from deepclean.remover_net.sequence_generator import SequenceGenerator
 
 
 class RemoverNeuralNetwork:
-
+    """
+    Neural network removing graffiti from image
+    """
     checkpoint_path = f'./training_weights_{settings.REMOVER_NETWORK_NAME}/weights-improvement.hdf5'
     csv_log_path_prefix = f'./training_weights_{settings.REMOVER_NETWORK_NAME}/training_log.'
 

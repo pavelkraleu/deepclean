@@ -11,6 +11,9 @@ import matplotlib.pyplot as plt
 
 
 class Cleaner:
+    """
+    Class responsible for processing video files and removing graffiti from them
+    """
     video_files = glob.glob(settings.CLEANER_VIDEO_FILES_PATH)
 
     video_resolution = (1920, 1088)
@@ -21,7 +24,9 @@ class Cleaner:
         self.remover_net = RemoverNeuralNetwork()
 
     def process_data(self, with_graffiti, masks, backgrounds):
-
+        """
+        Prepares frame for Remover network
+        """
         final_masks = []
         final_backgrounds = []
         final_backgrounds_orig = []
@@ -91,7 +96,11 @@ class Cleaner:
         return frame, opening
 
     def save_sample(self, x, y, mask, output_path):
-
+        """
+        Generates a single frame with source and processed frame and also graffiti mask.
+        This frame is stored to disk.
+        TODO : Is there some way how to move image from matplotlib to imageio without storing it on disk ?
+        """
         fig, axs = plt.subplots(1, 2, figsize=(16, 9), dpi=150)
         axs[0].imshow(x)
         axs[1].imshow(y)
@@ -141,6 +150,7 @@ class Cleaner:
 
                     result, segmentation = self.process_frame(frame_orig)
 
+                    # Save frame to Ramdisk and make SSD happy :)
                     self.save_sample(frame_orig, result, segmentation,
                                      f'./ramdisk/tmp.png')
 
