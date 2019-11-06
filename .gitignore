@@ -6,5 +6,13 @@ background_images
 venv/
 video_files/*
 .idea
-training_data/
 training_data.tar
+video_files/
+source_video_files/
+debug/*
+training_weights_resnet34
+training_results
+training_data_validation
+training_results-final-0.8
+training_weights_remover
+
