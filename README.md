@@ -14,8 +14,8 @@ For background images I made few hundred still images and also taken multiple vi
 Rows shown below reporesents :
 * **Graffiti on background** - Graffiti from original photo pasted to a new background in random orientation
 * **Mask** - Mask showing where in the image graffiti is 
-* **Background** - Original background without graffiti we are trying to reconstruct
 * **Background without graffiti** - Used for background reconstruction
+* **Background** - Original background without graffiti we are trying to reconstruct
 
 <table>
 <tr>
@@ -33,18 +33,18 @@ Rows shown below reporesents :
 <td><img src="training_data/masks/6246025075392155291329773433399226.jpg"></td>
 </tr>
 <tr>
-<td><img src="training_data/background/24041044197541570427048765321291706.jpg"></td>
-<td><img src="training_data/background/1890844649050851198352290444015391.jpg"></td>
-<td><img src="training_data/background/38682170269064597393399288459270823.jpg"></td>
-<td><img src="training_data/background/6654690004604873804043818019546405.jpg"></td>
-<td><img src="training_data/background/6246025075392155291329773433399226.jpg"></td>
-</tr>
-<tr>
 <td><img src="training_data/graffiti_removed/24041044197541570427048765321291706.jpg"></td>
 <td><img src="training_data/graffiti_removed/1890844649050851198352290444015391.jpg"></td>
 <td><img src="training_data/graffiti_removed/38682170269064597393399288459270823.jpg"></td>
 <td><img src="training_data/graffiti_removed/6654690004604873804043818019546405.jpg"></td>
 <td><img src="training_data/graffiti_removed/6246025075392155291329773433399226.jpg"></td>
+</tr>
+<tr>
+<td><img src="training_data/background/24041044197541570427048765321291706.jpg"></td>
+<td><img src="training_data/background/1890844649050851198352290444015391.jpg"></td>
+<td><img src="training_data/background/38682170269064597393399288459270823.jpg"></td>
+<td><img src="training_data/background/6654690004604873804043818019546405.jpg"></td>
+<td><img src="training_data/background/6246025075392155291329773433399226.jpg"></td>
 </tr>
 </table>
 
@@ -93,7 +93,11 @@ Number of graffiti in training sample had following distribution :
 random.choices([1, 2, 3, 4], [0.7, 0.1, 0.1, 0.1])
 ```
 
-## Graffiti detection
+## Model
+
+<img src="readme_images/detection_schema.png">
+
+### Graffiti detection
 
 For graffiti detection i used library [Segmentation models](https://github.com/qubvel/segmentation_models) offering multiple models. After some experimentation I have settled down on `U-Net` with `resnet34`.
 
@@ -108,7 +112,7 @@ Part of this project was also experimentation with different loss functions. Bel
 </table>
 
 
-## Graffiti removal 
+### Graffiti removal 
 
 For graffiti removal I used great work of Mathias Gruber and his project [PConv-Keras](https://github.com/MathiasGruber/PConv-Keras). Weight supplied by this project has been fine tuned for my dataset.
 
@@ -117,7 +121,7 @@ For graffiti removal I used great work of Mathias Gruber and his project [PConv-
 I wanted model to be able to distinguish graffiti from normal city scenery, without much false positives which I think works quite satisfactory, considering that work presented here builds on only 238 graffiti samples.
 
 More video samples can be seen on following YouTube video : 
-<a href="#">
+<a href="https://www.youtube.com/watch?v=ke9WU45nGhA">
 <img src="readme_images/youtube_link.png">
 </a>
 
